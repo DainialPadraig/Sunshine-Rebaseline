@@ -38,12 +38,9 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
 
-    private Context mContext;
-
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
 
-        mContext = context;
     }
 
     /**
@@ -62,7 +59,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.v(LOG_TAG, "Inserting " + cityName + ", with coord: " + lat + ", " + lon);
 
         // First, check if the location with this city name exists in the db
-        Cursor locationCursor = mContext.getContentResolver().query(
+        Cursor locationCursor = getContext().getContentResolver().query(
                 WeatherContract.LocationEntry.CONTENT_URI,
                 new String[]{WeatherContract.LocationEntry._ID},
                 WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
@@ -85,7 +82,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             locationValues.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, lon);
 
             // Finally, insert location data into the database.
-            Uri locationInsertUri = mContext.getContentResolver()
+            Uri locationInsertUri = getContext().getContentResolver()
                     .insert(WeatherContract.LocationEntry.CONTENT_URI, locationValues);
 
             // The resulting URI contains the ID for the row. Extract the locationId from the URI.
@@ -105,9 +102,9 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
 
-        Log.d(LOG_TAG, "onPerformSync()");
-        Log.v(LOG_TAG, "onHandleIntent()");
+        Log.d(LOG_TAG, "Starting sync.");
 
+        // Getting the zip code to send to the API.
         String locationQuery = Utility.getPreferredLocation(getContext());
 
         Log.v(LOG_TAG, "locationQuery: " + locationQuery);
@@ -234,8 +231,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             double cityLatitude = cityCoord.getDouble(OWM_COORD_LAT);
             double cityLongitude = cityCoord.getDouble(OWM_COORD_LONG);
 
-            Log.v(LOG_TAG, cityName + ", with coord: " + cityLatitude + " " + cityLongitude);
-
             // Insert the location into the database.
             long locationID = addLocation(locationQuery, cityName, cityLatitude, cityLongitude);
 
@@ -303,11 +298,11 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             if (cVVector.size() > 0) {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
                 cVVector.toArray(cvArray);
-                mContext.getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI,
-                        cvArray);
+                getContext().getContentResolver()
+                        .bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, cvArray);
             }
 
-            Log.d(LOG_TAG, "Sunshine Service complete. " + cVVector.size() + " inserted.");
+            Log.d(LOG_TAG, "Sunshine Sync complete. " + cVVector.size() + " inserted.");
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);

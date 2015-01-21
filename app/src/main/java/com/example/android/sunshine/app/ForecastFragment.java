@@ -180,25 +180,7 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     private void updateWeather() {
 
         Context context = getActivity();
-        SunshineSyncAdapter syncAdapter = new SunshineSyncAdapter(context, true);
-        syncAdapter.syncImmediately(context);
-
-/*
-        String location = Utility.getPreferredLocation(getActivity());
-        Intent updateIntent = new Intent(getActivity(), SunshineService.class);
-        updateIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, location);
-        getActivity().startService(updateIntent);
-
-        // Set an alarm to update weather again in 5 seconds.
-        mAlarmManager = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
-        Intent alarmReceiverIntent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
-        alarmReceiverIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, location);
-        mAlarmIntent = PendingIntent.getBroadcast(getActivity(), 0, alarmReceiverIntent,
-                PendingIntent.FLAG_ONE_SHOT);
-
-        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + 5 * 1000, mAlarmIntent);
-*/
+        SunshineSyncAdapter.syncImmediately(context);
 
     }
 

@@ -47,13 +47,6 @@
             android:name=".data.WeatherProvider"
             android:exported="false"
             android:syncable="true" />
-        <!-- An IntentService to update the weather forecast -->
-        <service
-            android:name=".service.SunshineService" />
-        <!-- An AlarmReceiver to update the weather forecast periodically. -->
-        <receiver
-            android:name=".service.SunshineService$AlarmReceiver"
-            android:enabled="true" />
         <!-- SyncAdapter's dummy authentication service -->
         <service
             android:name=".sync.SunshineAuthenticatorService">
