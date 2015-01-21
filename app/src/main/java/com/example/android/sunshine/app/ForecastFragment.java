@@ -15,9 +15,14 @@
  */
 package com.example.android.sunshine.app;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -34,6 +39,7 @@ import android.widget.ListView;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.data.WeatherContract.LocationEntry;
 import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
+import com.example.android.sunshine.app.service.SunshineService;
 
 import java.util.Date;
 
@@ -48,6 +54,9 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
     private ListView mListView;
     private int mPosition = ListView.INVALID_POSITION;
     private boolean mUseTodayLayout;
+
+    private AlarmManager mAlarmManager;
+    private PendingIntent mAlarmIntent;
 
     private static final String SELECTED_KEY = "selected_position";
 
@@ -172,7 +181,19 @@ public class ForecastFragment extends Fragment implements LoaderCallbacks<Cursor
 
     private void updateWeather() {
         String location = Utility.getPreferredLocation(getActivity());
-        new FetchWeatherTask(getActivity()).execute(location);
+        Intent updateIntent = new Intent(getActivity(), SunshineService.class);
+        updateIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, location);
+        getActivity().startService(updateIntent);
+
+        // Set an alarm to update weather again in 5 seconds.
+        mAlarmManager = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+        Intent alarmReceiverIntent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
+        alarmReceiverIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, location);
+        mAlarmIntent = PendingIntent.getBroadcast(getActivity(), 0, alarmReceiverIntent,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + 5 * 1000, mAlarmIntent);
     }
 
     @Override
