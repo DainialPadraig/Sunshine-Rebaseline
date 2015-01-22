@@ -60,6 +60,7 @@ public class SettingsActivity extends PreferenceActivity
      * is changed.)
      */
     private void bindPreferenceSummaryToValue(Preference preference) {
+
         mBindingPreference = true;
 
         // Set the listener to watch for value changes.
@@ -77,12 +78,13 @@ public class SettingsActivity extends PreferenceActivity
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object value) {
+
         String stringValue = value.toString();
 
         // are we starting the preference activity?
         if ( !mBindingPreference ) {
             if (preference.getKey().equals(getString(R.string.pref_location_key))) {
-                String location = value.toString();
+                String location = stringValue;
                 SunshineSyncAdapter.syncImmediately(this);
             } else {
                 // notify code that weather may be impacted
@@ -102,6 +104,7 @@ public class SettingsActivity extends PreferenceActivity
             // For other preferences, set the summary to the value's simple string representation.
             preference.setSummary(stringValue);
         }
+
         return true;
     }
 
